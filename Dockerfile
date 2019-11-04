@@ -70,8 +70,7 @@ RUN DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
 # ------------------------------------------------------------------
 RUN DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
         libmysqlclient-dev \
-        libkrb5-dev
-        && \
+        libkrb5-dev && \
     $PIP_INSTALL \
         apache-airflow[all]
 
