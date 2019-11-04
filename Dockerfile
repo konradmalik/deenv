@@ -63,7 +63,7 @@ RUN DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
         scipy \
         pandas \
         cloudpickle \
-		joblib \
+		joblib
 
 # ==================================================================
 # Airflow
