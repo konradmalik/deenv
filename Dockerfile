@@ -69,10 +69,17 @@ RUN DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
 # Airflow
 # ------------------------------------------------------------------
 RUN DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
+        # mysql
         libmysqlclient-dev \
-        libkrb5-dev && \
+        # kerberos
+        libkrb5-dev \
+        # crypto
+        libssl-dev \
+        # hive
+        libsasl2-dev && \
     $PIP_INSTALL \
         apache-airflow[all]
+ENV AIRFLOW_HOME=~/airflow
 
 # ==================================================================
 # Dagster
