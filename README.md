@@ -3,6 +3,8 @@
 
 Container for data engineering, data flows/pipelines etc. All-in-one toolbox for a data engineer.
 
+For contents, included libraries etc. see the first couple of lines of the Dockerfile.
+
 Build container using "make":
 
 ```bash
