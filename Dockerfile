@@ -166,6 +166,12 @@ RUN groupadd -r deenv && \
 RUN mkdir -p /home/deenv && \
     chown -R deenv:deenv /home/deenv
     
+# Add Tini
+ENV TINI_VERSION v0.18.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
+RUN chmod +x /tini
+ENTRYPOINT ["/tini", "--"]
+
 # run as non-root
 USER deenv
 
@@ -185,11 +191,5 @@ EXPOSE 8192
 
 # change below for toree on remote spark
 ENV SPARK_OPTS='--master=local[*]'
-
-# Add Tini
-ENV TINI_VERSION v0.18.0
-ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
-RUN chmod +x /tini
-ENTRYPOINT ["/tini", "--"]
 
 CMD bash
