@@ -180,6 +180,10 @@ RUN mkdir -p /home/deenv/data
 VOLUME /home/deenv/data
 WORKDIR /home/deenv
 
+# airflow
+EXPOSE 8080
+# dagster
+EXPOSE 3000
 # jupyterlab
 EXPOSE 8888
 # jupyterhub
