@@ -9,5 +9,4 @@ docker run --rm -it \
 	--publish 8080:8080 \
     --ipc host \
     --user root:root \
-	konradmalik/deenv jupyterhub --ip=0.0.0.0 --no-ssl
-
+	konradmalik/deenv jupyterhub --ip=0.0.0.0 --no-ssl --Spawner.default_url='/lab'

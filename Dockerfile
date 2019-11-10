@@ -116,6 +116,10 @@ RUN conda init && \
 ENV SPARK_VERSION=2.4.4
 ENV SPARK_ARCHIVE=https://www-eu.apache.org/dist/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-hadoop2.7.tgz
 ENV JAVA_VERSION=8
+# for now this is a must, spark cassandra connector does not work with 2.12
+ENV SCALA_VERSION=2.11.12
+# compatibility matrix with scala version
+ENV ALMOND_VERSION=0.6.0 
 RUN curl -s $SPARK_ARCHIVE | tar -xz -C /usr/local/
 
 ENV SPARK_HOME /usr/local/spark-$SPARK_VERSION-bin-hadoop2.7
@@ -136,10 +140,16 @@ ENV JAVA_HOME /usr/lib/jvm/java-$JAVA_VERSION-openjdk-amd64
 RUN cp $(ls $SPARK_HOME/python/lib/py4j*) $SPARK_HOME/python/lib/py4j-src.zip
 ENV PYTHONPATH $SPARK_HOME/python/lib/pyspark.zip:$SPARK_HOME/python/lib/py4j-src.zip:$PYTHONPATH
 
-# install apache toree in jupyterlab
-RUN $PIP_INSTALL \ 
-    toree && \
-    jupyter toree install --spark_home=$SPARK_HOME --interpreters=Scala,SQL
+# install proper scala/spark kernel
+RUN curl -Lo coursier https://git.io/coursier-cli && \
+    chmod +x coursier && \
+    ./coursier bootstrap \
+        -r jitpack \
+        -i user -I user:sh.almond:scala-kernel-api_$SCALA_VERSION:$ALMOND_VERSION \
+        sh.almond:scala-kernel_$SCALA_VERSION:$ALMOND_VERSION \
+        -o almond
+RUN ./almond --install && \
+    rm -rf almond coursier
 
 # ==================================================================
 # Polynote
@@ -192,8 +202,5 @@ EXPOSE 8000
 EXPOSE 4040
 #polynote
 EXPOSE 8192
-
-# change below for toree on remote spark
-ENV SPARK_OPTS='--master=local[*]'
 
 CMD bash
