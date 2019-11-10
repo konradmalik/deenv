@@ -140,7 +140,7 @@ ENV JAVA_HOME /usr/lib/jvm/java-$JAVA_VERSION-openjdk-amd64
 RUN cp $(ls $SPARK_HOME/python/lib/py4j*) $SPARK_HOME/python/lib/py4j-src.zip
 ENV PYTHONPATH $SPARK_HOME/python/lib/pyspark.zip:$SPARK_HOME/python/lib/py4j-src.zip:$PYTHONPATH
 
-# install proper scala/spark kernel
+# install proper scala/spark kernel 
 RUN curl -Lo coursier https://git.io/coursier-cli && \
     chmod +x coursier && \
     ./coursier bootstrap \
@@ -148,7 +148,17 @@ RUN curl -Lo coursier https://git.io/coursier-cli && \
         -i user -I user:sh.almond:scala-kernel-api_$SCALA_VERSION:$ALMOND_VERSION \
         sh.almond:scala-kernel_$SCALA_VERSION:$ALMOND_VERSION \
         -o almond
-RUN ./almond --install --global && \
+# use existing spark directory to not download all this shit
+# https://github.com/almond-sh/almond/issues/227
+# last line with ALMOND wont be needed when we move to almond >= 0.7.0
+RUN ./almond --install --global --predef-code "
+    val jars = java.nio.file.Files.list(java.nio.file.Paths.get(\"${SPARK_HOME}/jars\")).toArray.map(_.toString)
+        .map { fname =>
+            val path = java.nio.file.FileSystems.getDefault().getPath(fname)
+            ammonite.ops.Path(path)
+        }
+    interp.load.cp(jars)
+    import $ivy.`sh.almond::almond-spark:${ALMOND_VERSION}`" && \ 
     rm -rf almond coursier
 
 # ==================================================================
