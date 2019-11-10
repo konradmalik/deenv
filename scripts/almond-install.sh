@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # need to override hadoop to support http!
-# also disable logs for 'org' to not pollute all notebook
 ./almond --install --global \
 --predef-code " 
   val jars = java.nio.file.Files.list(java.nio.file.Paths.get(\"${SPARK_HOME}/jars\")).toArray.map(_.toString)
@@ -11,6 +10,4 @@
     }
   interp.load.cp(jars)
   import \$ivy.\`sh.almond::almond-spark:${ALMOND_VERSION}\`
-  import org.apache.log4j.{Level, Logger}
-  Logger.getLogger(\"org\").setLevel(Level.OFF)
   " 
