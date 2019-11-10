@@ -148,7 +148,7 @@ RUN curl -Lo coursier https://git.io/coursier-cli && \
         -i user -I user:sh.almond:scala-kernel-api_$SCALA_VERSION:$ALMOND_VERSION \
         sh.almond:scala-kernel_$SCALA_VERSION:$ALMOND_VERSION \
         -o almond
-RUN ./almond --install && \
+RUN ./almond --install --global && \
     rm -rf almond coursier
 
 # ==================================================================
