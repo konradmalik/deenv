@@ -7,5 +7,5 @@
         ammonite.ops.Path(path)
     }
   interp.load.cp(jars)
-  import \$ivy.`sh.almond::almond-spark:${ALMOND_VERSION}`
-" 
+  import \$ivy.\`sh.almond::almond-spark:${ALMOND_VERSION}\`
+  " 
