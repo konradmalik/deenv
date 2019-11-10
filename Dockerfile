@@ -140,6 +140,8 @@ ENV JAVA_HOME /usr/lib/jvm/java-$JAVA_VERSION-openjdk-amd64
 RUN cp $(ls $SPARK_HOME/python/lib/py4j*) $SPARK_HOME/python/lib/py4j-src.zip
 ENV PYTHONPATH $SPARK_HOME/python/lib/pyspark.zip:$SPARK_HOME/python/lib/py4j-src.zip:$PYTHONPATH
 
+# need to override hadoop to support http! (overriden only when using scala in jupyter)
+ENV HADOOP_VERSION=2.10.0
 # install proper scala/spark kernel 
 RUN curl -Lo coursier https://git.io/coursier-cli && \
     chmod +x coursier && \
