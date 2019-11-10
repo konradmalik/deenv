@@ -9,6 +9,28 @@ For contents, included libraries etc. see the first couple of lines of the Docke
 
 * scala kernel for jupyter is provided by almond. In prefdef it automatically imports local spark jars and downloads (if not present) almond libs, so only thing you need to do is to create spark session. Refer to almond's "usage-spark.md" document.
 
+* to add additional dependencies to the notebook, use imports with ivy like this example: 
+```
+import $ivy.`org.apache.hadoop::hadoop-client:2.10.0`
+```
+
+* all logs from 'org' domain are hidden by default to not to pollute notebook cells. If you want to enable them, use this example:
+```
+import org.apache.log4j.{Level, Logger}
+Logger.getLogger("org").setLevel(Level.INFO)
+```
+
+* example snippet to create spark session in notebook (spark master can be remote!):
+```
+val spark = {
+  NotebookSparkSession.builder()
+    .master("spark://localhost:7077")
+    .config("spark.executor.instances", "4")
+    .config("spark.executor.memory", "2g")
+    .getOrCreate()
+}
+```
+
 ## How to build:
 Image is available on dockerhub (konradmalik/deenv).
 
