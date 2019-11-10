@@ -160,7 +160,7 @@ RUN curl -sL $POLYNOTE_ARCHIVE | tar -zx -C /usr/local/
 ENV POLYNOTE_HOME /usr/local/polynote
 
 RUN $PIP_INSTALL \ 
-    jep jedi pyspark==$SPARK_VERSION virtualenv
+    jep jedi virtualenv
 
 # ==================================================================
 # config & cleanup
