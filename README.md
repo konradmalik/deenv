@@ -5,7 +5,14 @@ Container for data engineering, data flows/pipelines etc. All-in-one toolbox for
 
 For contents, included libraries etc. see the first couple of lines of the Dockerfile.
 
-Build container using "make":
+## Random notes
+
+* scala kernel for jupyter is provided by almond. In prefdef it automatically imports local spark jars and downloads (if not present) almond libs, so only thing you need to do is to create spark session. Refer to almond's "usage-spark.md" document.
+
+## How to build:
+Image is available on dockerhub (konradmalik/deenv).
+
+If you want to build locally, use "make":
 
 ```bash
 $ make build

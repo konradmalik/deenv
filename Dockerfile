@@ -151,15 +151,10 @@ RUN curl -Lo coursier https://git.io/coursier-cli && \
 # use existing spark directory to not download all this shit
 # https://github.com/almond-sh/almond/issues/227
 # last line with ALMOND wont be needed when we move to almond >= 0.7.0
-RUN ./almond --install --global --predef-code "
-    val jars = java.nio.file.Files.list(java.nio.file.Paths.get(\"${SPARK_HOME}/jars\")).toArray.map(_.toString)
-        .map { fname =>
-            val path = java.nio.file.FileSystems.getDefault().getPath(fname)
-            ammonite.ops.Path(path)
-        }
-    interp.load.cp(jars)
-    import $ivy.`sh.almond::almond-spark:${ALMOND_VERSION}`" && \ 
-    rm -rf almond coursier
+COPY scripts/almond-install.sh almond-install.sh
+RUN chmod +x almond-install.sh && \
+    ./almond-install.sh && \ 
+    rm -rf almond coursier almond-install.sh
 
 # ==================================================================
 # Polynote
