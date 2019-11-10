@@ -6,7 +6,7 @@
 ./almond --install --global \
 --predef-code " 
   val jars = java.nio.file.Files.list(java.nio.file.Paths.get(\"${SPARK_HOME}/jars\")).toArray.map(_.toString)
-    .filter(_.contains(\"curator\"
+    .filter(_.contains(\"curator\")
     .map { fname =>
         val path = java.nio.file.FileSystems.getDefault().getPath(fname)
         ammonite.ops.Path(path)
