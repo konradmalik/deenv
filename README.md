@@ -9,6 +9,8 @@ For contents, included libraries etc. see the first couple of lines of the Docke
 
 * scala kernel for jupyter is provided by almond. In prefdef it automatically imports local spark jars and downloads (if not present) almond libs, so only thing you need to do is to create spark session. Refer to almond's "usage-spark.md" document.
 
+* scala kernel will work with spark only if hadoop version is >= 2.9 - it added support for http filesystem which is needed in this case (otherwise executors will crash lopp)
+
 * to add additional dependencies to the notebook, use imports with ivy like this example: 
 ```
 import $ivy.`org.apache.hadoop::hadoop-client:2.10.0`
