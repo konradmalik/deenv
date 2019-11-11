@@ -116,9 +116,9 @@ RUN conda init && \
 ENV SPARK_VERSION=2.4.4
 ENV SPARK_ARCHIVE=https://www-eu.apache.org/dist/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-hadoop2.7.tgz
 ENV JAVA_VERSION=8
-ENV SCALA_VERSION=2.12.9
+ENV SCALA_VERSION=2.11.12
 # compatibility matrix with scala version
-ENV ALMOND_VERSION=0.8.2 
+ENV ALMOND_VERSION=0.6.0 
 RUN curl -s $SPARK_ARCHIVE | tar -xz -C /usr/local/
 
 ENV SPARK_HOME /usr/local/spark-$SPARK_VERSION-bin-hadoop2.7
