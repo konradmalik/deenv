@@ -90,7 +90,6 @@ RUN $PIP_INSTALL \
 # ==================================================================
 # jupyter hub
 # ------------------------------------------------------------------
-ENV SHELL=/bin/bash
 RUN DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
     npm  nodejs && \
     npm install -g configurable-http-proxy && \
@@ -172,10 +171,9 @@ RUN ldconfig && \
     rm -rf /var/lib/apt/lists/* /tmp/* ~/*
 
 # add default user
-RUN groupadd -r deenv && \
-    useradd -r -p $(openssl passwd -1 deenv) -g deenv -G sudo deenv
-RUN mkdir -p /home/deenv && \
-    chown -R deenv:deenv /home/deenv
+ENV DEFAULT_USER=deenv
+COPY scripts/add-user.sh add-user.sh
+RUN chmod +x add-user.sh && ./add-user.sh $DEFAULT_USER
     
 # Add Tini
 ENV TINI_VERSION v0.18.0
@@ -184,12 +182,12 @@ RUN chmod +x /tini
 ENTRYPOINT ["/tini", "--"]
 
 # run as non-root
-USER deenv
+USER $DEFAULT_USER
 
 # make sure data folder has proper permissions
-RUN mkdir -p /home/deenv/data
-VOLUME /home/deenv/data
-WORKDIR /home/deenv
+RUN mkdir -p /home/$DEFAULT_USER/data
+VOLUME /home/$DEFAULT_USER/data
+WORKDIR /home/$DEFAULT_USER
 
 # airflow
 EXPOSE 8080
