@@ -90,6 +90,7 @@ RUN $PIP_INSTALL \
 # ==================================================================
 # jupyter hub
 # ------------------------------------------------------------------
+ENV SHELL=/bin/bash
 RUN DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
     npm  nodejs && \
     npm install -g configurable-http-proxy && \
