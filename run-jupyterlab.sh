@@ -8,5 +8,4 @@ docker run --rm -it \
 	--publish 8080:8080 \
     --ipc host \
     --volume `pwd`/data:/home/deenv/data \
-	konradmalik/deenv jupyter lab --no-browser --ip=0.0.0.0 --NotebookApp.token=deenv --notebook-dir='/home/deenv
-
+	konradmalik/deenv jupyter lab --no-browser --ip=0.0.0.0 --NotebookApp.token=deenv --notebook-dir='/home/deenv'
