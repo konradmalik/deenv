@@ -151,6 +151,14 @@ RUN chmod +x almond-install.sh && \
     ./almond-install.sh && \ 
     rm -rf almond coursier almond-install.sh
 
+# add here jars necessary to use azure blob storage and amazon s3 with spark
+ENV HADOOP_VERSION=2.7.7
+ENV AWS_ARCHIVE=https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/$HADOOP_VERSION/hadoop-aws-$HADOOP_VERSION.jar
+ENV AZURE_ARCHIVE=https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-azure/$HADOOP_VERSION/hadoop-azure-$HADOOP_VERSION.jar
+RUN cd $SPARK_HOME/jars && \
+    curl -LO $AWS_ARCHIVE && \
+    curl -LO $AZURE_ARCHIVE
+
 # ==================================================================
 # Polynote
 # ------------------------------------------------------------------
