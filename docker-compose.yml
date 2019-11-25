@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+  jupyterlab:
+    image: konradmalik/deenv:latest
+    command: ./run-jupyterlab.sh
+    ports:
+      - 8888:8888
+
+  spark-master:
+    image: konradmalik/deenv:latest
+    command: ./run-master.sh
+    user: "root:root"
+    restart: unless-stopped
+    ports:
+      - 7077:7077
+      - 8080:8080
+
+  spark-worker:
+    image: konradmalik/deenv:latest
+    command: ./run-worker.sh
+    user: "root:root"
+    restart: unless-stopped
+    environment:
+        SPARK_MASTER: "spark://spark-master:7077"
+        SPARK_WORKER_CORES: "1"
+        SPARK_WORKER_MEMORY: "1G"
+    ports:
+      - 8081:8081

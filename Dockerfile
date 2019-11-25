@@ -12,7 +12,8 @@
 
 FROM ubuntu:18.04
 ENV LANG C.UTF-8
-ENV APT_INSTALL="apt-get install -y --no-install-recommends --fix-missing"
+ENV DEBIAN_FRONTEND=noninteractive
+ENV APT_INSTALL="apt-get update && apt-get install -y --no-install-recommends --fix-missing"
 ENV PIP_INSTALL="python -m pip --no-cache-dir install --upgrade"
 ENV GIT_CLONE="git clone --depth 10"
 
@@ -24,7 +25,7 @@ RUN rm -rf /var/lib/apt/lists/* \
 # ==================================================================
 # tools
 # ------------------------------------------------------------------
-RUN DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
+RUN eval $APT_INSTALL \
         build-essential \
         apt-utils \
         ca-certificates \
@@ -42,11 +43,11 @@ RUN DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
 # python
 # ------------------------------------------------------------------
 ENV PYTHON_COMPAT_VERSION=3.7
-RUN DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
+RUN eval $APT_INSTALL \
         software-properties-common && \
 	add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update && \
-	$APT_INSTALL \
+	eval $APT_INSTALL \
         python${PYTHON_COMPAT_VERSION} \
         python${PYTHON_COMPAT_VERSION}-dev \
         python3-distutils-extra \
@@ -68,7 +69,7 @@ RUN DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
 # ==================================================================
 # Airflow
 # ------------------------------------------------------------------
-RUN DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
+RUN eval $APT_INSTALL \
         # mysql
         libmysqlclient-dev \
         # kerberos
@@ -90,7 +91,7 @@ RUN $PIP_INSTALL \
 # ==================================================================
 # jupyter hub
 # ------------------------------------------------------------------
-RUN DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
+RUN eval $APT_INSTALL \
     npm  nodejs && \
     npm install -g configurable-http-proxy && \
     $PIP_INSTALL \
@@ -113,29 +114,50 @@ RUN conda init && \
 # ==================================================================
 # Spark (with pyspark and koalas)
 # ------------------------------------------------------------------
-ENV SPARK_VERSION=2.4.4
-ENV SPARK_ARCHIVE=https://www-eu.apache.org/dist/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-hadoop2.7.tgz
-ENV JAVA_VERSION=8
-ENV SCALA_VERSION=2.11.12
-# compatibility matrix with scala version
-ENV ALMOND_VERSION=0.6.0 
-RUN curl -s $SPARK_ARCHIVE | tar -xz -C /usr/local/
+# HADOOP
+ENV HADOOP_VERSION 2.10.0
+ENV HADOOP_ARCHIVE=https://www-eu.apache.org/dist/hadoop/common/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz
+ENV HADOOP_HOME /usr/local/hadoop-$HADOOP_VERSION
+ENV HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
+ENV PATH $PATH:$HADOOP_HOME/bin
+RUN curl -s $HADOOP_ARCHIVE | tar -xz -C /usr/local/
 
-ENV SPARK_HOME /usr/local/spark-$SPARK_VERSION-bin-hadoop2.7
-ENV PATH $PATH:$SPARK_HOME/sbin
+# SPARK
+ENV SPARK_VERSION 2.4.4
+ENV SPARK_ARCHIVE=https://www-eu.apache.org/dist/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-without-hadoop.tgz
+ENV SPARK_HOME /usr/local/spark-${SPARK_VERSION}-bin-without-hadoop
+ENV SPARK_LOG=/tmp
+ENV SPARK_HOST=
+ENV SPARK_MASTER=
+ENV SPARK_WORKER_CORES=
+ENV SPARK_WORKER_MEMORY=
+ENV PATH $PATH:${SPARK_HOME}/sbin
+RUN curl -s $SPARK_ARCHIVE | tar -zx -C /usr/local/
 
-RUN DEBIAN_FRONTEND=noninteractive $APT_INSTALL \
-        openjdk-$JAVA_VERSION-jdk \
-		scala \
-        && \
-    $PIP_INSTALL \
-        koalas
-ENV JAVA_HOME /usr/lib/jvm/java-$JAVA_VERSION-openjdk-amd64
+# add here jars necessary to use azure blob storage and amazon s3 with spark
+ENV AWS_HADOOP_ARCHIVE=https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/$HADOOP_VERSION/hadoop-aws-$HADOOP_VERSION.jar
+# below version must be exact as maven says that above was compiled with!
+ENV AWS_VERSION=1.11.271
+ENV AWS_ARCHIVE=https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk/$AWS_VERSION/aws-java-sdk-$AWS_VERSION.jar
+ENV AZURE_HADOOP_ARCHIVE=https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-azure/$HADOOP_VERSION/hadoop-azure-$HADOOP_VERSION.jar
+# below version must be exact as maven says that above was compiled with!
+ENV AZURE_VERSION=7.0.0
+ENV AZURE_ARCHIVE=https://repo1.maven.org/maven2/com/microsoft/azure/azure-storage/$AZURE_VERSION/azure-storage-$AZURE_VERSION.jar
+RUN cd $SPARK_HOME/jars && \
+    curl -LO $AWS_ARCHIVE && \
+    curl -LO $AWS_HADOOP_ARCHIVE && \
+    curl -LO $AZURE_ARCHIVE && \
+    curl -LO $AZURE_HADOOP_ARCHIVE
 
-#Also, make sure your PYTHONPATH can find the PySpark and Py4J under $SPARK_HOME/python/lib:
+# Pyspark related stuff
+RUN $PIP_INSTALL koalas
+# make sure your PYTHONPATH can find the PySpark and Py4J under $SPARK_HOME/python/lib:
 RUN cp $(ls $SPARK_HOME/python/lib/py4j*) $SPARK_HOME/python/lib/py4j-src.zip
 ENV PYTHONPATH $SPARK_HOME/python/lib/pyspark.zip:$SPARK_HOME/python/lib/py4j-src.zip:$PYTHONPATH
 
+# almond for scala and spark in jupyter
+# compatibility matrix with scala version
+ENV ALMOND_VERSION=0.6.0 
 # install proper scala/spark kernel 
 RUN curl -Lo coursier https://git.io/coursier-cli && \
     chmod +x coursier && \
@@ -144,28 +166,13 @@ RUN curl -Lo coursier https://git.io/coursier-cli && \
         -i user -I user:sh.almond:scala-kernel-api_$SCALA_VERSION:$ALMOND_VERSION \
         sh.almond:scala-kernel_$SCALA_VERSION:$ALMOND_VERSION \
         -o almond
-# use existing spark directory to not download all this shit
+# in script we may want to use existing spark directory to not download all this shit
 # https://github.com/almond-sh/almond/issues/227
+# last line with ALMOND wont be needed when we move to almond >= 0.7.0
 COPY scripts/almond-install.sh almond-install.sh
 RUN chmod +x almond-install.sh && \
     ./almond-install.sh && \ 
     rm -rf almond coursier almond-install.sh
-
-# add here jars necessary to use azure blob storage and amazon s3 with spark
-ENV HADOOP_VERSION=2.7.7
-ENV AWS_HADOOP_ARCHIVE=https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/$HADOOP_VERSION/hadoop-aws-$HADOOP_VERSION.jar
-# below version must be exact as maven says that above was compiled with!
-ENV AWS_VERSION=1.7.4
-ENV AWS_ARCHIVE=https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk/$AWS_VERSION/aws-java-sdk-$AWS_VERSION.jar
-ENV AZURE_HADOOP_ARCHIVE=https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-azure/$HADOOP_VERSION/hadoop-azure-$HADOOP_VERSION.jar
-# below version must be exact as maven says that above was compiled with!
-ENV AZURE_VERSION=2.0.0
-ENV AZURE_ARCHIVE=https://repo1.maven.org/maven2/com/microsoft/azure/azure-storage/$AZURE_VERSION/azure-storage-$AZURE_VERSION.jar
-RUN cd $SPARK_HOME/jars && \
-    curl -LO $AWS_ARCHIVE && \
-    curl -LO $AWS_HADOOP_ARCHIVE && \
-    curl -LO $AZURE_ARCHIVE && \
-    curl -LO $AZURE_HADOOP_ARCHIVE
 
 # ==================================================================
 # Polynote
@@ -190,12 +197,23 @@ RUN ldconfig && \
 ENV DEFAULT_USER=deenv
 COPY scripts/add-user.sh add-user.sh
 RUN chmod +x add-user.sh && ./add-user.sh $DEFAULT_USER
-    
-# Add Tini
+
+# make spark dir owned by that user
+RUN chown -R $DEFAULT_USER:$DEFAULT_USER $SPARK_HOME
+
+# make jupyter notebook token equal to username by default
+ENV JUPYTER_LAB_TOKEN=$DEFAULT_USER
+
+# Add Tini and entrypoint
 ENV TINI_VERSION v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
-RUN chmod +x /tini
-ENTRYPOINT ["/tini", "--"]
+COPY scripts/docker-entrypoint.sh .
+RUN chmod +x /tini && chmod +x docker-entrypoint.sh
+ENTRYPOINT ["/tini", "--", "/docker-entrypoint.sh"]
+
+# copy run scripts
+COPY scripts/run-* /
+RUN chmod +x /run-*
 
 # run as non-root
 USER $DEFAULT_USER
@@ -203,19 +221,16 @@ USER $DEFAULT_USER
 # make sure data folder has proper permissions
 RUN mkdir -p /home/$DEFAULT_USER/data
 VOLUME /home/$DEFAULT_USER/data
-WORKDIR /home/$DEFAULT_USER
 
-# airflow
-EXPOSE 8080
-# dagster
-EXPOSE 3000
 # jupyterlab
 EXPOSE 8888
 # jupyterhub
 EXPOSE 8000
 # spark ui
 EXPOSE 4040
-#polynote
+# spark master
+EXPOSE 7077
+# spark worker
+EXPOSE 8081
+# polynote
 EXPOSE 8192
-
-CMD bash
