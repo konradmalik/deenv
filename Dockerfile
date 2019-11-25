@@ -131,7 +131,7 @@ ENV SPARK_HOST=
 ENV SPARK_MASTER=
 ENV SPARK_WORKER_CORES=
 ENV SPARK_WORKER_MEMORY=
-ENV PATH $PATH:${SPARK_HOME}/sbin
+ENV PATH $PATH:${SPARK_HOME}/bin
 RUN curl -s $SPARK_ARCHIVE | tar -zx -C /usr/local/
 
 # add here jars necessary to use azure blob storage and amazon s3 with spark
