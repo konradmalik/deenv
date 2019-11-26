@@ -78,7 +78,8 @@ RUN eval $APT_INSTALL \
         libssl-dev \
         # hive
         libsasl2-dev && \
-    python -m pip --no-cache-dir install --no-binary apache-airflow[all]
+    $PIP_INSTALL \
+        apache-airflow[all]
 ENV AIRFLOW_HOME=~/airflow
 
 # ==================================================================
