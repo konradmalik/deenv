@@ -78,7 +78,7 @@ RUN eval $APT_INSTALL \
         libssl-dev \
         # hive
         libsasl2-dev && \
-    $PIP_INSTALL --no-binary \
+    eval $("$PIP_INSTALL --no-binary") \
         apache-airflow[all]
 ENV AIRFLOW_HOME=~/airflow
 
