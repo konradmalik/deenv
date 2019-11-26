@@ -78,6 +78,7 @@ RUN eval $APT_INSTALL \
         libssl-dev \
         # hive
         libsasl2-dev && \
+    $PIP_INSTALL pep517 && \
     $PIP_INSTALL \
         apache-airflow[all]
 ENV AIRFLOW_HOME=~/airflow
