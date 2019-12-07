@@ -67,6 +67,19 @@ RUN eval $APT_INSTALL \
 		joblib
 
 # ==================================================================
+# Java and scala
+# ------------------------------------------------------------------
+ENV JAVA_VERSION=8
+ENV SCALA_VERSION=2.11.12
+RUN eval $APT_INSTALL \
+        openjdk-$JAVA_VERSION-jdk \
+		scala \
+        && \
+    $PIP_INSTALL \
+        koalas
+ENV JAVA_HOME /usr/lib/jvm/java-$JAVA_VERSION-openjdk-amd64
+
+# ==================================================================
 # Airflow
 # ------------------------------------------------------------------
 RUN eval $APT_INSTALL \
@@ -145,11 +158,16 @@ ENV AZURE_HADOOP_ARCHIVE=https://repo1.maven.org/maven2/org/apache/hadoop/hadoop
 # below version must be exact as maven says that above was compiled with!
 ENV AZURE_VERSION=7.0.0
 ENV AZURE_ARCHIVE=https://repo1.maven.org/maven2/com/microsoft/azure/azure-storage/$AZURE_VERSION/azure-storage-$AZURE_VERSION.jar
+# also add cassandra connector and dependencies
+ENV SPARK_CASSANDRA_ARCHIVE=http://dl.bintray.com/spark-packages/maven/datastax/spark-cassandra-connector/2.4.0-s_2.11/spark-cassandra-connector-2.4.0-s_2.11.jar
+ENV TWITTER_ARCHIVE=https://repo1.maven.org/maven2/com/twitter/jsr166e/1.1.0/jsr166e-1.1.0.jar
 RUN cd $SPARK_HOME/jars && \
     curl -LO $AWS_ARCHIVE && \
     curl -LO $AWS_HADOOP_ARCHIVE && \
     curl -LO $AZURE_ARCHIVE && \
-    curl -LO $AZURE_HADOOP_ARCHIVE
+    curl -LO $AZURE_HADOOP_ARCHIVE && \
+    curl -LO $SPARK_CASSANDRA_ARCHIVE && \
+    curl -LO $TWITTER_ARCHIVE
 
 # Pyspark related stuff
 RUN $PIP_INSTALL koalas
@@ -224,6 +242,8 @@ USER $DEFAULT_USER
 RUN mkdir -p /home/$DEFAULT_USER/data
 VOLUME /home/$DEFAULT_USER/data
 
+# dagit
+EXPOSE 3000
 # jupyterlab
 EXPOSE 8888
 # jupyterhub
