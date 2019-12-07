@@ -218,7 +218,7 @@ RUN $PIP_INSTALL \
 # ------------------------------------------------------------------
 RUN ldconfig && \
     apt-get clean && \
-    apt-get autoremove && \
+    apt-get -y autoremove && \
     rm -rf /var/lib/apt/lists/* /tmp/* ~/*
 
 # add default user
