@@ -78,6 +78,8 @@ RUN eval $APT_INSTALL \
         libssl-dev \
         # hive
         libsasl2-dev && \
+        # run pymssql separatly due to https://github.com/pymssql/pymssql/issues/668
+    $PIP_INSTALL "pymssql<3.0" && \
     $PIP_INSTALL \
         apache-airflow[all]
 ENV AIRFLOW_HOME=~/airflow
