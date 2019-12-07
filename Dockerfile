@@ -193,6 +193,8 @@ ENV AIRFLOW_HOME=~/airflow
 # ------------------------------------------------------------------
 RUN $PIP_INSTALL \
         dagster dagit \
+        dagster-airflow \
+        dagster-dask \
         dagster-aws \
         dagster-bash \
         dagster-cron \
