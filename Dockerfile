@@ -80,30 +80,6 @@ RUN eval $APT_INSTALL \
 ENV JAVA_HOME /usr/lib/jvm/java-$JAVA_VERSION-openjdk-amd64
 
 # ==================================================================
-# Airflow
-# ------------------------------------------------------------------
-RUN eval $APT_INSTALL \
-        # mysql
-        libmysqlclient-dev \
-        # kerberos
-        libkrb5-dev \
-        # crypto
-        libssl-dev \
-        # hive
-        libsasl2-dev && \
-        # run pymssql separatly due to https://github.com/pymssql/pymssql/issues/668
-    $PIP_INSTALL "pymssql<3.0" && \
-    $PIP_INSTALL \
-        apache-airflow[all]
-ENV AIRFLOW_HOME=~/airflow
-
-# ==================================================================
-# Dagster
-# ------------------------------------------------------------------
-RUN $PIP_INSTALL \
-        dagster dagit
-
-# ==================================================================
 # jupyter hub
 # ------------------------------------------------------------------
 RUN eval $APT_INSTALL \
@@ -194,6 +170,38 @@ RUN chmod +x almond-install.sh && \
     ./almond-install.sh && \ 
     rm -rf almond coursier almond-install.sh
 
+# ==================================================================
+# Airflow
+# ------------------------------------------------------------------
+RUN eval $APT_INSTALL \
+        # mysql
+        libmysqlclient-dev \
+        # kerberos
+        libkrb5-dev \
+        # crypto
+        libssl-dev \
+        # hive
+        libsasl2-dev && \
+        # run pymssql separatly due to https://github.com/pymssql/pymssql/issues/668
+    $PIP_INSTALL "pymssql<3.0" && \
+    $PIP_INSTALL \
+        apache-airflow[all]
+ENV AIRFLOW_HOME=~/airflow
+
+# ==================================================================
+# Dagster
+# ------------------------------------------------------------------
+RUN $PIP_INSTALL \
+        dagster dagit \
+        dagster-aws \
+        dagster-bash \
+        dagster-cron \
+        dagster-pandas \
+        dagster-postgres \
+        dagster-pyspark \
+        dagster-spark \
+        dagster-ssh
+    
 # ==================================================================
 # Polynote
 # ------------------------------------------------------------------
