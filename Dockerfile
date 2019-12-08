@@ -192,7 +192,7 @@ ENV AIRFLOW_HOME=~/airflow
 # Dagster
 # ------------------------------------------------------------------
 RUN $PIP_INSTALL \
-        dagster dagit \
+        dagster \
         dagster-airflow \
         dagster-dask \
         dagster-aws \
@@ -202,7 +202,9 @@ RUN $PIP_INSTALL \
         dagster-postgres \
         dagster-pyspark \
         dagster-spark \
-        dagster-ssh
+        dagster-ssh \
+        # must be last
+        && $PIP_INSTALL dagit
     
 # ==================================================================
 # Polynote
