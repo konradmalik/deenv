@@ -197,7 +197,7 @@ RUN eval $APT_INSTALL \
         # run pymssql separatly due to https://github.com/pymssql/pymssql/issues/668
     $PIP_INSTALL "pymssql<3.0" && \
     $PIP_INSTALL \
-        apache-airflow[all]
+        apache-airflow[postgres,azure,devel,redis,rabbitmq,ssh,slack]
 ENV AIRFLOW_HOME=~/airflow
 
 # ==================================================================
