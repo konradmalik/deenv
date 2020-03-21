@@ -70,11 +70,15 @@ RUN eval $APT_INSTALL \
 # Java and scala
 # ------------------------------------------------------------------
 ENV JAVA_VERSION=8
-ENV SCALA_VERSION=2.11.12
+ENV SCALA_VERSION=2.12.9
+ENV SBT_VERSION=1.3.8
 RUN eval $APT_INSTALL \
-        openjdk-$JAVA_VERSION-jdk \
-		scala \
-        && \
+        openjdk-$JAVA_VERSION-jdk && \
+    curl -LO www.scala-lang.org/files/archive/scala-$SCALA_VERSION.deb && \
+	dpkg -i scala-$SCALA_VERSION.deb && \
+    curl -LO https://bintray.com/artifact/download/sbt/debian/sbt-$SBT_VERSION.deb && \
+	dpkg -i sbt-$SBT_VERSION.deb && \
+    rm -rf *.deb && \
     $PIP_INSTALL \
         koalas
 ENV JAVA_HOME /usr/lib/jvm/java-$JAVA_VERSION-openjdk-amd64
@@ -111,10 +115,10 @@ ENV HADOOP_ARCHIVE=https://www-eu.apache.org/dist/hadoop/common/hadoop-$HADOOP_V
 ENV HADOOP_HOME /usr/local/hadoop-$HADOOP_VERSION
 ENV HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
 ENV PATH $PATH:$HADOOP_HOME/bin
-RUN curl -s $HADOOP_ARCHIVE | tar -xz -C /usr/local/
+RUN curl -sL $HADOOP_ARCHIVE | tar -xz -C /usr/local/
 
 # SPARK
-ENV SPARK_VERSION 2.4.4
+ENV SPARK_VERSION 2.4.5
 ENV SPARK_ARCHIVE=https://www-eu.apache.org/dist/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-without-hadoop.tgz
 ENV SPARK_HOME /usr/local/spark-${SPARK_VERSION}-bin-without-hadoop
 ENV SPARK_LOG=/tmp
@@ -123,7 +127,7 @@ ENV SPARK_MASTER=
 ENV SPARK_WORKER_CORES=
 ENV SPARK_WORKER_MEMORY=
 ENV PATH $PATH:${SPARK_HOME}/bin
-RUN curl -s $SPARK_ARCHIVE | tar -zx -C /usr/local/
+RUN curl -sL $SPARK_ARCHIVE | tar -zx -C /usr/local/
 
 # add here jars necessary to use azure blob storage and amazon s3 with spark
 ENV AWS_HADOOP_ARCHIVE=https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/$HADOOP_VERSION/hadoop-aws-$HADOOP_VERSION.jar
@@ -135,25 +139,33 @@ ENV AZURE_HADOOP_ARCHIVE=https://repo1.maven.org/maven2/org/apache/hadoop/hadoop
 ENV AZURE_VERSION=7.0.0
 ENV AZURE_ARCHIVE=https://repo1.maven.org/maven2/com/microsoft/azure/azure-storage/$AZURE_VERSION/azure-storage-$AZURE_VERSION.jar
 # also add cassandra connector and dependencies
-ENV SPARK_CASSANDRA_ARCHIVE=http://dl.bintray.com/spark-packages/maven/datastax/spark-cassandra-connector/2.4.0-s_2.11/spark-cassandra-connector-2.4.0-s_2.11.jar
+ENV SPARK_CASSANDRA_ARCHIVE=https://repo1.maven.org/maven2/com/datastax/spark/spark-cassandra-connector_2.12/2.4.3/spark-cassandra-connector_2.12-2.4.3.jar
 ENV TWITTER_ARCHIVE=https://repo1.maven.org/maven2/com/twitter/jsr166e/1.1.0/jsr166e-1.1.0.jar
+# add analytics zoo by intel
+ENV ANALYTICS_ZOO_ARCHIVE=https://repo1.maven.org/maven2/com/intel/analytics/zoo/analytics-zoo-bigdl_0.10.0-spark_2.4.3/0.7.0/analytics-zoo-bigdl_0.10.0-spark_2.4.3-0.7.0.jar
+# add spark excel support
+ENV SPARK_EXCEL_ARCHIVE=https://repo1.maven.org/maven2/com/crealytics/spark-excel_2.12/0.13.1/spark-excel_2.12-0.13.1.jar
+ENV XMLBEANS_ARCHIVE=https://repo1.maven.org/maven2/org/apache/xmlbeans/xmlbeans/3.1.0/xmlbeans-3.1.0.jar
+ENV POI_OOXML_SCHEMAS_ARCHIVE=https://repo1.maven.org/maven2/org/apache/poi/poi-ooxml-schemas/4.1.1/poi-ooxml-schemas-4.1.1.jar
 RUN cd $SPARK_HOME/jars && \
     curl -LO $AWS_ARCHIVE && \
     curl -LO $AWS_HADOOP_ARCHIVE && \
     curl -LO $AZURE_ARCHIVE && \
     curl -LO $AZURE_HADOOP_ARCHIVE && \
     curl -LO $SPARK_CASSANDRA_ARCHIVE && \
-    curl -LO $TWITTER_ARCHIVE
+    curl -LO $TWITTER_ARCHIVE && \
+    curl -LO $SPARK_EXCEL_ARCHIVE && \
+    curl -LO $ANALYTICS_ZOO_ARCHIVE
 
 # Pyspark related stuff
-RUN $PIP_INSTALL koalas
+RUN $PIP_INSTALL koalas cassandra-driver
 # make sure your PYTHONPATH can find the PySpark and Py4J under $SPARK_HOME/python/lib:
 RUN cp $(ls $SPARK_HOME/python/lib/py4j*) $SPARK_HOME/python/lib/py4j-src.zip
 ENV PYTHONPATH $SPARK_HOME/python/lib/pyspark.zip:$SPARK_HOME/python/lib/py4j-src.zip:$PYTHONPATH
 
 # almond for scala and spark in jupyter
 # compatibility matrix with scala version
-ENV ALMOND_VERSION=0.6.0 
+ENV ALMOND_VERSION=0.9.1 
 # install proper scala/spark kernel 
 RUN curl -Lo coursier https://git.io/coursier-cli && \
     chmod +x coursier && \
@@ -209,7 +221,7 @@ RUN $PIP_INSTALL \
 # ==================================================================
 # Polynote
 # ------------------------------------------------------------------
-ENV POLYNOTE_VERSION=0.2.11
+ENV POLYNOTE_VERSION=0.3.3
 ENV POLYNOTE_ARCHIVE=https://github.com/polynote/polynote/releases/download/$POLYNOTE_VERSION/polynote-dist.tar.gz
 RUN curl -sL $POLYNOTE_ARCHIVE | tar -zx -C /usr/local/
 ENV POLYNOTE_HOME /usr/local/polynote
@@ -239,8 +251,8 @@ ENV JUPYTER_LAB_TOKEN=$DEFAULT_USER
 # Add Tini and entrypoint
 ENV TINI_VERSION v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
-COPY scripts/docker-entrypoint.sh .
-RUN chmod +x /tini && chmod +x docker-entrypoint.sh
+COPY scripts/docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /tini && chmod +x /docker-entrypoint.sh
 ENTRYPOINT ["/tini", "--", "/docker-entrypoint.sh"]
 
 # copy run scripts
