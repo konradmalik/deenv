@@ -188,16 +188,12 @@ RUN chmod +x almond-install.sh && \
 RUN eval $APT_INSTALL \
         # mysql
         libmysqlclient-dev \
-        # kerberos
-        libkrb5-dev \
-        # crypto
-        libssl-dev \
         # hive
         libsasl2-dev && \
         # run pymssql separatly due to https://github.com/pymssql/pymssql/issues/668
     $PIP_INSTALL "pymssql<3.0" && \
     $PIP_INSTALL \
-        apache-airflow[postgres,azure,devel,redis,rabbitmq,ssh,slack]
+        apache-airflow[mysql,hive,hdfs,postgres,azure,devel,redis,rabbitmq,ssh,slack]
 ENV AIRFLOW_HOME=~/airflow
 
 # ==================================================================
