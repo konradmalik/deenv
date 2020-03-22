@@ -91,7 +91,8 @@ RUN eval $APT_INSTALL \
     npm install -g configurable-http-proxy && \
     $PIP_INSTALL \
         jupyterhub jupyterlab && \
-        jupyterhub --generate-config
+    mkdir -p /etc/jupyterhub
+COPY configs/jupyterhub_config.py /etc/jupyterhub/jupyterhub_config.py
     
 # ==================================================================
 # MLflow 
@@ -190,10 +191,8 @@ RUN eval $APT_INSTALL \
         libmysqlclient-dev \
         # hive
         libsasl2-dev && \
-        # run pymssql separatly due to https://github.com/pymssql/pymssql/issues/668
-    $PIP_INSTALL "pymssql<3.0" && \
     $PIP_INSTALL \
-        apache-airflow[mysql,hive,hdfs,postgres,azure,devel,redis,rabbitmq,ssh,slack]
+        apache-airflow[mysql,hive,hdfs,postgres,azure,devel,redis,ssh]
 ENV AIRFLOW_HOME=~/airflow
 
 # ==================================================================
