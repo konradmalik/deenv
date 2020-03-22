@@ -70,7 +70,7 @@ RUN eval $APT_INSTALL \
 # Java and scala
 # ------------------------------------------------------------------
 ENV JAVA_VERSION=8
-ENV SCALA_VERSION=2.12.8
+ENV SCALA_VERSION=2.12.11
 ENV SBT_VERSION=1.3.8
 RUN eval $APT_INSTALL \
         openjdk-$JAVA_VERSION-jdk && \
@@ -78,9 +78,7 @@ RUN eval $APT_INSTALL \
 	dpkg -i scala-$SCALA_VERSION.deb && \
     curl -LO https://bintray.com/artifact/download/sbt/debian/sbt-$SBT_VERSION.deb && \
 	dpkg -i sbt-$SBT_VERSION.deb && \
-    rm -rf *.deb && \
-    $PIP_INSTALL \
-        koalas
+    rm -rf *.deb
 ENV JAVA_HOME /usr/lib/jvm/java-$JAVA_VERSION-openjdk-amd64
 
 # ==================================================================
@@ -163,25 +161,6 @@ RUN $PIP_INSTALL koalas cassandra-driver
 # make sure your PYTHONPATH can find the PySpark and Py4J under $SPARK_HOME/python/lib:
 RUN cp $(ls $SPARK_HOME/python/lib/py4j*) $SPARK_HOME/python/lib/py4j-src.zip
 ENV PYTHONPATH $SPARK_HOME/python/lib/pyspark.zip:$SPARK_HOME/python/lib/py4j-src.zip:$PYTHONPATH
-
-# almond for scala and spark in jupyter
-# compatibility matrix with scala version
-ENV ALMOND_VERSION=0.9.1 
-# install proper scala/spark kernel 
-RUN curl -Lo coursier https://git.io/coursier-cli && \
-    chmod +x coursier && \
-    ./coursier bootstrap \
-        -r jitpack \
-        -i user -I user:sh.almond:scala-kernel-api_$SCALA_VERSION:$ALMOND_VERSION \
-        sh.almond:scala-kernel_$SCALA_VERSION:$ALMOND_VERSION \
-        -o almond
-# in script we may want to use existing spark directory to not download all this shit
-# https://github.com/almond-sh/almond/issues/227
-# last line with ALMOND wont be needed when we move to almond >= 0.7.0
-COPY scripts/almond-install.sh almond-install.sh
-RUN chmod +x almond-install.sh && \
-    ./almond-install.sh && \ 
-    rm -rf almond coursier almond-install.sh
 
 # ==================================================================
 # Airflow
