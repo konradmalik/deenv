@@ -139,12 +139,10 @@ ENV AZURE_HADOOP_ARCHIVE=https://repo1.maven.org/maven2/org/apache/hadoop/hadoop
 ENV AZURE_VERSION=7.0.0
 ENV AZURE_ARCHIVE=https://repo1.maven.org/maven2/com/microsoft/azure/azure-storage/$AZURE_VERSION/azure-storage-$AZURE_VERSION.jar
 # also add cassandra connector and dependencies
-ENV SPARK_CASSANDRA_ARCHIVE=https://repo1.maven.org/maven2/com/datastax/spark/spark-cassandra-connector_2.12/2.4.3/spark-cassandra-connector_2.12-2.4.3.jar
+ENV SPARK_CASSANDRA_ARCHIVE=https://repo1.maven.org/maven2/com/datastax/spark/spark-cassandra-connector_$SCALA_COMPAT_VERSION/2.4.3/spark-cassandra-connector_$SCALA_COMPAT_VERSION-2.4.3.jar
 ENV TWITTER_ARCHIVE=https://repo1.maven.org/maven2/com/twitter/jsr166e/1.1.0/jsr166e-1.1.0.jar
-# add analytics zoo by intel
-ENV ANALYTICS_ZOO_ARCHIVE=https://repo1.maven.org/maven2/com/intel/analytics/zoo/analytics-zoo-bigdl_0.10.0-spark_2.4.3/0.7.0/analytics-zoo-bigdl_0.10.0-spark_2.4.3-0.7.0.jar
 # add spark excel support
-ENV SPARK_EXCEL_ARCHIVE=https://repo1.maven.org/maven2/com/crealytics/spark-excel_2.12/0.13.1/spark-excel_2.12-0.13.1.jar
+ENV SPARK_EXCEL_ARCHIVE=https://repo1.maven.org/maven2/com/crealytics/spark-excel_$SCALA_COMPAT_VERSION/0.13.1/spark-excel_$SCALA_COMPAT_VERSION-0.13.1.jar
 ENV XMLBEANS_ARCHIVE=https://repo1.maven.org/maven2/org/apache/xmlbeans/xmlbeans/3.1.0/xmlbeans-3.1.0.jar
 ENV POI_OOXML_SCHEMAS_ARCHIVE=https://repo1.maven.org/maven2/org/apache/poi/poi-ooxml-schemas/4.1.1/poi-ooxml-schemas-4.1.1.jar
 RUN cd $SPARK_HOME/jars && \
