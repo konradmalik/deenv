@@ -152,8 +152,7 @@ RUN cd $SPARK_HOME/jars && \
     curl -LO $AZURE_HADOOP_ARCHIVE && \
     curl -LO $SPARK_CASSANDRA_ARCHIVE && \
     curl -LO $TWITTER_ARCHIVE && \
-    curl -LO $SPARK_EXCEL_ARCHIVE && \
-    curl -LO $ANALYTICS_ZOO_ARCHIVE
+    curl -LO $SPARK_EXCEL_ARCHIVE
 
 # Pyspark related stuff
 RUN $PIP_INSTALL koalas cassandra-driver
