@@ -71,6 +71,7 @@ RUN eval $APT_INSTALL \
 # ------------------------------------------------------------------
 ENV JAVA_VERSION=8
 ENV SCALA_VERSION=2.12.11
+ENV SCALA_COMPAT_VERSION=2.12
 ENV SBT_VERSION=1.3.8
 RUN eval $APT_INSTALL \
         openjdk-$JAVA_VERSION-jdk && \
@@ -118,8 +119,8 @@ RUN curl -sL $HADOOP_ARCHIVE | tar -xz -C /usr/local/
 
 # SPARK
 ENV SPARK_VERSION 2.4.5
-ENV SPARK_ARCHIVE=https://www-eu.apache.org/dist/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-without-hadoop.tgz
-ENV SPARK_HOME /usr/local/spark-${SPARK_VERSION}-bin-without-hadoop
+ENV SPARK_ARCHIVE=https://downloads.apache.org/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-without-hadoop-scala-$SCALA_COMPAT_VERSION.tgz
+ENV SPARK_HOME /usr/local/spark-${SPARK_VERSION}-bin-without-hadoop-scala-${SCALA_COMPAT_VERSION}
 ENV SPARK_LOG=/tmp
 ENV SPARK_HOST=
 ENV SPARK_MASTER=
