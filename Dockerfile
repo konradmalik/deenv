@@ -99,7 +99,6 @@ RUN ldconfig && \
 
 # add default user
 ENV DEFAULT_USER=deenv
-COPY scripts/add-user.sh add-user.sh
 RUN chmod +x add-user.sh && ./add-user.sh $DEFAULT_USER
 
 # make spark dir owned by that user
