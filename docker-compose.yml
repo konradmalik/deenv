@@ -8,7 +8,7 @@ services:
       - 8888:8888
 
   spark-master:
-    image: konradmalik/deenv:latest
+    image: konradmalik/spark:latest
     command: ./run-master.sh
     user: "root:root"
     restart: unless-stopped
@@ -17,7 +17,7 @@ services:
       - 8080:8080
 
   spark-worker:
-    image: konradmalik/deenv:latest
+    image: konradmalik/spark:latest
     command: ./run-worker.sh
     user: "root:root"
     restart: unless-stopped
