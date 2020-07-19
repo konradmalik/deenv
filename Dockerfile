@@ -1,13 +1,14 @@
 # ==================================================================
 # module list
 # ------------------------------------------------------------------
-# python                    3.7    (apt)
 # jupyter hub+lab           latest (pip)
 # airflow                   latest (pip)
 # dagster                   latest (pip)
-# MLflow		            latest (pip)
-# Spark+koalas              2.4.5  (apt+pip)
+# MLflow                    latest (pip)
 # polynote                  latest (github tar)
+# Dask                      latest (pip)
+# Ray                       latest (pip)
+# Prefect                   latest (pip)
 # ==================================================================
 
 FROM konradmalik/spark:latest
@@ -77,11 +78,29 @@ RUN $PIP_INSTALL \
         dagster-ssh \
         # must be last
         && $PIP_INSTALL dagit
-    
+
+# ==================================================================
+# Dask
+# ------------------------------------------------------------------
+RUN $PIP_INSTALL \
+        dask
+
+# ==================================================================
+# Ray
+# ------------------------------------------------------------------
+RUN $PIP_INSTALL \
+        ray ray[debug]
+
+# ==================================================================
+# Prefect
+# ------------------------------------------------------------------
+RUN $PIP_INSTALL \
+        prefect
+
 # ==================================================================
 # Polynote
 # ------------------------------------------------------------------
-ENV POLYNOTE_VERSION=0.3.3
+ENV POLYNOTE_VERSION=0.3.11
 ENV POLYNOTE_ARCHIVE=https://github.com/polynote/polynote/releases/download/$POLYNOTE_VERSION/polynote-dist.tar.gz
 RUN curl -sL $POLYNOTE_ARCHIVE | tar -zx -C /usr/local/
 ENV POLYNOTE_HOME /usr/local/polynote
